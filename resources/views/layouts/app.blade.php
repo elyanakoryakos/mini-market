@@ -68,6 +68,12 @@
     <div class="container">
       <a class="navbar-brand" href="{{ route('products.index') }}">Mini Market</a>
       <div class="ms-auto d-flex gap-2">
+        {{-- ✅ Cart badge --}}
+        @php $cartCount = collect(session('cart', []))->sum('qty'); @endphp
+        <a class="btn btn-outline-light btn-sm" href="{{ route('cart.index') }}">
+          Cart ({{ $cartCount }})
+        </a>
+
         <a class="btn btn-outline-light btn-sm" href="{{ route('products.index') }}">All</a>
         <a class="btn btn-success btn-sm" href="{{ route('products.create') }}">+ Add Product</a>
       </div>
@@ -75,9 +81,9 @@
   </nav>
 
   <main class="container">
-    @if(session('ok'))
-      <div class="alert alert-success">{{ session('ok') }}</div>
-    @endif
+    {{-- ✅ flash + validation alerts --}}
+    @include('partials.alerts')
+
     @yield('content')
   </main>
 

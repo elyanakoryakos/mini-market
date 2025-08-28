@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
 
 class ProductController extends Controller
 {
@@ -19,11 +21,11 @@ class ProductController extends Controller
             'dir'       => ['nullable', Rule::in(['asc','desc'])],
         ]);
 
-        $q   = $request->input('q');
-        $min = $request->input('min_price');
-        $max = $request->input('max_price');
-        $sort= $request->input('sort', 'created_at');
-        $dir = $request->input('dir',  'desc');
+        $q    = $request->input('q');
+        $min  = $request->input('min_price');
+        $max  = $request->input('max_price');
+        $sort = $request->input('sort', 'created_at');
+        $dir  = $request->input('dir',  'desc');
 
         $products = Product::query()
             ->when($q,   fn($qry) => $qry->where('name', 'like', "%{$q}%"))
@@ -42,18 +44,14 @@ class ProductController extends Controller
         return view('products.create');
     }
 
-    public function store(Request $request)
+    public function store(StoreProductRequest $request)
     {
-        $data = $request->validate([
-            'name'  => ['required','string','max:255'],
-            'price' => ['required','numeric','min:0'],
-        ]);
-
-        $product = Product::create($data);
+        $data = $request->validated();   // name, price
+        Product::create($data);
 
         return redirect()
-            ->route('products.show', $product)
-            ->with('ok', 'Product added!');
+            ->route('products.index')
+            ->with('success', 'Product created successfully.');
     }
 
     // VIEW DETAILS
@@ -68,17 +66,23 @@ class ProductController extends Controller
         return view('products.edit', compact('product'));
     }
 
-    public function update(Request $request, Product $product)
+    public function update(UpdateProductRequest $request, Product $product)
     {
-        $data = $request->validate([
-            'name'  => ['required','string','max:255'],
-            'price' => ['required','numeric','min:0'],
-        ]);
-
+        $data = $request->validated();   // name, price
         $product->update($data);
 
         return redirect()
-            ->route('products.show', $product)
-            ->with('ok', 'Product updated!');
+            ->route('products.index')
+            ->with('success', 'Product updated successfully.');
+    }
+
+    // DELETE
+    public function destroy(Product $product)
+    {
+        $product->delete();
+
+        return redirect()
+            ->route('products.index')
+            ->with('success', 'Product deleted successfully.');
     }
 }

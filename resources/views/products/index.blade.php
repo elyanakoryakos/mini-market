@@ -52,7 +52,7 @@
               <th>Name</th>
               <th class="text-end">Price</th>
               <th>Created</th>
-              <th></th>
+              <th class="text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -62,8 +62,23 @@
                 <td><a href="{{ route('products.show', $p) }}">{{ $p->name }}</a></td>
                 <td class="text-end">${{ number_format($p->price,2) }}</td>
                 <td>{{ $p->created_at->format('Y-m-d H:i') }}</td>
-                <td class="text-end">
+                <td class="text-end d-flex gap-1 justify-content-end">
+                  {{-- Edit --}}
                   <a class="btn btn-sm btn-outline-primary" href="{{ route('products.edit', $p) }}">Edit</a>
+
+                  {{-- Add to Cart --}}
+                  <form action="{{ route('cart.add', $p->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <input type="hidden" name="quantity" value="1">
+                    <button class="btn btn-sm btn-success">Add to Cart</button>
+                  </form>
+
+                  {{-- Delete --}}
+                  <form action="{{ route('products.destroy', $p) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this product?')">
+                    @csrf
+                    @method('DELETE')
+                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                  </form>
                 </td>
               </tr>
             @endforeach
